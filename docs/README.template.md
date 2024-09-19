@@ -1,8 +1,6 @@
-A fork of [@postalsys/gettext](http://github.com/alexanderwallin/node-gettext)
+A fork of [alexanderwallin/node-gettext](http://github.com/alexanderwallin/node-gettext)
 
-<h1 align="center">
- @postalsys/gettext
-</h1>
+# @postalsys/gettext
 
 **`@postalsys/gettext`** is a JavaScript implementation of (a large subset of) [gettext](https://www.gnu.org/software/gettext/gettext.html), a localization framework originally written in C.
 
@@ -47,14 +45,14 @@ npm install --save @postalsys/gettext
 ## Usage
 
 ```js
-const Gettext = require("@postalsys/gettext");
-const swedishTranslations = require("./translations/sv-SE.json");
+const Gettext = require('@postalsys/gettext');
+const swedishTranslations = require('./translations/sv-SE.json');
 
 const gt = new Gettext();
-gt.addTranslations("sv-SE", "messages", swedishTranslations);
-gt.setLocale("sv-SE");
+gt.addTranslations('sv-SE', 'messages', swedishTranslations);
+gt.setLocale('sv-SE');
 
-gt.gettext("The world is a funny place");
+gt.gettext('The world is a funny place');
 // -> "Världen är en underlig plats"
 ```
 
@@ -63,8 +61,8 @@ gt.gettext("The world is a funny place");
 ```js
 // Add translations etc...
 
-gt.on("error", (error) => console.log("oh nose", error));
-gt.gettext("An unrecognized message");
+gt.on('error', error => console.log('oh nose', error));
+gt.gettext('An unrecognized message');
 // -> 'oh nose', 'An unrecognized message'
 ```
 
@@ -77,20 +75,20 @@ gt.gettext("An unrecognized message");
 Here is an example where we read a bunch of translation files from disk and add them to our `Gettext` instance:
 
 ```js
-const fs = require("fs");
-const path = require("path");
-const Gettext = require("@postalsys/gettext");
-const { po } = require("gettext-parser");
+const fs = require('fs');
+const path = require('path');
+const Gettext = require('@postalsys/gettext');
+const { po } = require('gettext-parser');
 
 // In this example, our translations are found at
 // path/to/locales/LOCALE/DOMAIN.po
-const translationsDir = "path/to/locales";
-const locales = ["en", "fi-FI", "sv-SE"];
-const domain = "messages";
+const translationsDir = 'path/to/locales';
+const locales = ['en', 'fi-FI', 'sv-SE'];
+const domain = 'messages';
 
 const gt = new Gettext();
 
-locales.forEach((locale) => {
+locales.forEach(locale => {
     const fileName = `${domain}.po`;
     const translationsFilePath = path.join(translationsDir, locale, filename);
     const translationsContent = fs.readSync(translationsFilePath);

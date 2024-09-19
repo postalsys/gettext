@@ -1,8 +1,6 @@
-A fork of [@postalsys/gettext](http://github.com/alexanderwallin/node-gettext)
+A fork of [alexanderwallin/node-gettext](http://github.com/alexanderwallin/node-gettext)
 
-<h1 align="center">
- @postalsys/gettext
-</h1>
+# @postalsys/gettext
 
 **`@postalsys/gettext`** is a JavaScript implementation of (a large subset of) [gettext](https://www.gnu.org/software/gettext/gettext.html), a localization framework originally written in C.
 
@@ -47,14 +45,14 @@ npm install --save @postalsys/gettext
 ## Usage
 
 ```js
-const Gettext = require("@postalsys/gettext");
-const swedishTranslations = require("./translations/sv-SE.json");
+const Gettext = require('@postalsys/gettext');
+const swedishTranslations = require('./translations/sv-SE.json');
 
 const gt = new Gettext();
-gt.addTranslations("sv-SE", "messages", swedishTranslations);
-gt.setLocale("sv-SE");
+gt.addTranslations('sv-SE', 'messages', swedishTranslations);
+gt.setLocale('sv-SE');
 
-gt.gettext("The world is a funny place");
+gt.gettext('The world is a funny place');
 // -> "Världen är en underlig plats"
 ```
 
@@ -63,8 +61,8 @@ gt.gettext("The world is a funny place");
 ```js
 // Add translations etc...
 
-gt.on("error", (error) => console.log("oh nose", error));
-gt.gettext("An unrecognized message");
+gt.on('error', error => console.log('oh nose', error));
+gt.gettext('An unrecognized message');
 // -> 'oh nose', 'An unrecognized message'
 ```
 
@@ -77,20 +75,20 @@ gt.gettext("An unrecognized message");
 Here is an example where we read a bunch of translation files from disk and add them to our `Gettext` instance:
 
 ```js
-const fs = require("fs");
-const path = require("path");
-const Gettext = require("@postalsys/gettext");
-const { po } = require("gettext-parser");
+const fs = require('fs');
+const path = require('path');
+const Gettext = require('@postalsys/gettext');
+const { po } = require('gettext-parser');
 
 // In this example, our translations are found at
 // path/to/locales/LOCALE/DOMAIN.po
-const translationsDir = "path/to/locales";
-const locales = ["en", "fi-FI", "sv-SE"];
-const domain = "messages";
+const translationsDir = 'path/to/locales';
+const locales = ['en', 'fi-FI', 'sv-SE'];
+const domain = 'messages';
 
 const gt = new Gettext();
 
-locales.forEach((locale) => {
+locales.forEach(locale => {
     const fileName = `${domain}.po`;
     const translationsFilePath = path.join(translationsDir, locale, fileName);
     const translationsContent = fs.readFileSync(translationsFilePath);
@@ -176,7 +174,7 @@ catalogs.
 **Example**
 
 ```js
-gt.addTranslations("sv-SE", "messages", translationsObject);
+gt.addTranslations('sv-SE', 'messages', translationsObject);
 ```
 
 <a name="Gettext+setLocale"></a>
@@ -192,7 +190,7 @@ Sets the locale to get translated messages for.
 **Example**
 
 ```js
-gt.setLocale("sv-SE");
+gt.setLocale('sv-SE');
 ```
 
 <a name="Gettext+setTextDomain"></a>
@@ -208,7 +206,7 @@ Sets the default gettext domain.
 **Example**
 
 ```js
-gt.setTextDomain("domainname");
+gt.setTextDomain('domainname');
 ```
 
 <a name="Gettext+gettext"></a>
@@ -225,7 +223,7 @@ Translates a string using the default textdomain
 **Example**
 
 ```js
-gt.gettext("Some text");
+gt.gettext('Some text');
 ```
 
 <a name="Gettext+dgettext"></a>
@@ -243,7 +241,7 @@ Translates a string using a specific domain
 **Example**
 
 ```js
-gt.dgettext("domainname", "Some text");
+gt.dgettext('domainname', 'Some text');
 ```
 
 <a name="Gettext+ngettext"></a>
@@ -262,7 +260,7 @@ Translates a plural string using the default textdomain
 **Example**
 
 ```js
-gt.ngettext("One thing", "Many things", numberOfThings);
+gt.ngettext('One thing', 'Many things', numberOfThings);
 ```
 
 <a name="Gettext+dngettext"></a>
@@ -282,7 +280,7 @@ Translates a plural string using a specific textdomain
 **Example**
 
 ```js
-gt.dngettext("domainname", "One thing", "Many things", numberOfThings);
+gt.dngettext('domainname', 'One thing', 'Many things', numberOfThings);
 ```
 
 <a name="Gettext+pgettext"></a>
@@ -300,7 +298,7 @@ Translates a string from a specific context using the default textdomain
 **Example**
 
 ```js
-gt.pgettext("sports", "Back");
+gt.pgettext('sports', 'Back');
 ```
 
 <a name="Gettext+dpgettext"></a>
@@ -319,7 +317,7 @@ Translates a string from a specific context using s specific textdomain
 **Example**
 
 ```js
-gt.dpgettext("domainname", "sports", "Back");
+gt.dpgettext('domainname', 'sports', 'Back');
 ```
 
 <a name="Gettext+npgettext"></a>
@@ -339,7 +337,7 @@ Translates a plural string from a specific context using the default textdomain
 **Example**
 
 ```js
-gt.npgettext("sports", "Back", "%d backs", numberOfBacks);
+gt.npgettext('sports', 'Back', '%d backs', numberOfBacks);
 ```
 
 <a name="Gettext+dnpgettext"></a>
@@ -360,7 +358,7 @@ Translates a plural string from a specifi context using a specific textdomain
 **Example**
 
 ```js
-gt.dnpgettext("domainname", "sports", "Back", "%d backs", numberOfBacks);
+gt.dnpgettext('domainname', 'sports', 'Back', '%d backs', numberOfBacks);
 ```
 
 <a name="Gettext+textdomain"></a>
