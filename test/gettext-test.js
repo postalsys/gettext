@@ -262,6 +262,11 @@ describe('Gettext', () => {
             expect(errorListener.callCount).to.equal(0);
         });
 
+        it('should emit an error event when adding a reserved key as locale', () => {
+            gt.addTranslations('__proto__', 'polluted', 'pwned');
+            expect(errorListener.callCount).to.equal(1);
+        });
+
         it('should emit an error event when a locale that has no translations is set', () => {
             gt.setLocale('et-EE');
             expect(errorListener.callCount).to.equal(1);
