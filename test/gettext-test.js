@@ -1,42 +1,44 @@
+/* eslint no-unused-expressions: 0 */
+
 'use strict';
 
-var chai = require('chai');
-var Gettext = require('../lib/gettext');
-var fs = require('fs');
-var sinon = require('sinon');
+let chai = require('chai');
+let Gettext = require('../lib/gettext');
+let fs = require('fs');
+let sinon = require('sinon');
 
-var expect = chai.expect;
+let expect = chai.expect;
 chai.config.includeStack = true;
 
-describe('Gettext', function() {
-    var gt;
-    var jsonFile;
+describe('Gettext', () => {
+    let gt;
+    let jsonFile;
 
-    beforeEach(function() {
+    beforeEach(() => {
         gt = new Gettext({ debug: false });
         jsonFile = JSON.parse(fs.readFileSync(__dirname + '/fixtures/latin13.json'));
     });
 
-    describe('#constructor', function() {
-        var gtc;
+    describe('#constructor', () => {
+        let gtc;
 
-        beforeEach(function() {
+        beforeEach(() => {
             gtc = null;
         });
 
-        describe('#sourceLocale option', function() {
-            it('should accept any string as a locale', function() {
+        describe('#sourceLocale option', () => {
+            it('should accept any string as a locale', () => {
                 gtc = new Gettext({ sourceLocale: 'en-US' });
                 expect(gtc.sourceLocale).to.equal('en-US');
                 gtc = new Gettext({ sourceLocale: '01234' });
                 expect(gtc.sourceLocale).to.equal('01234');
             });
 
-            it('should default to en empty string', function() {
-                expect((new Gettext()).sourceLocale).to.equal('');
+            it('should default to en empty string', () => {
+                expect(new Gettext().sourceLocale).to.equal('');
             });
 
-            it('should reject non-string values', function() {
+            it('should reject non-string values', () => {
                 gtc = new Gettext({ sourceLocale: null });
                 expect(gtc.sourceLocale).to.equal('');
                 gtc = new Gettext({ sourceLocale: 123 });
@@ -45,21 +47,21 @@ describe('Gettext', function() {
                 expect(gtc.sourceLocale).to.equal('');
                 gtc = new Gettext({ sourceLocale: {} });
                 expect(gtc.sourceLocale).to.equal('');
-                gtc = new Gettext({ sourceLocale: function() {} });
+                gtc = new Gettext({ sourceLocale: () => {} });
                 expect(gtc.sourceLocale).to.equal('');
             });
         });
     });
 
-    describe('#getLanguageCode', function() {
-        it('should normalize locale string', function() {
+    describe('#getLanguageCode', () => {
+        it('should normalize locale string', () => {
             expect(Gettext.getLanguageCode('ab-cd_ef.utf-8')).to.equal('ab');
             expect(Gettext.getLanguageCode('ab-cd_ef')).to.equal('ab');
         });
     });
 
-    describe('#addTranslations', function() {
-        it('should store added translations', function() {
+    describe('#addTranslations', () => {
+        it('should store added translations', () => {
             gt.addTranslations('et-EE', 'messages', jsonFile);
 
             expect(gt.catalogs['et-EE']).to.exist;
@@ -67,7 +69,7 @@ describe('Gettext', function() {
             expect(gt.catalogs['et-EE'].messages.charset).to.equal('iso-8859-13');
         });
 
-        it('should store added translations on a custom domain', function() {
+        it('should store added translations on a custom domain', () => {
             gt.addTranslations('et-EE', 'mydomain', jsonFile);
 
             expect(gt.catalogs['et-EE'].mydomain).to.exist;
@@ -75,12 +77,12 @@ describe('Gettext', function() {
         });
     });
 
-    describe('#setLocale', function() {
-        it('should have the empty string as default locale', function() {
+    describe('#setLocale', () => {
+        it('should have the empty string as default locale', () => {
             expect(gt.locale).to.equal('');
         });
 
-        it('should accept whatever string is passed as locale', function() {
+        it('should accept whatever string is passed as locale', () => {
             gt.setLocale('de-AT');
             expect(gt.locale).to.equal('de-AT');
             gt.setLocale('01234');
@@ -89,14 +91,14 @@ describe('Gettext', function() {
             expect(gt.locale).to.equal('');
         });
 
-        it('should reject non-string locales', function() {
+        it('should reject non-string locales', () => {
             gt.setLocale(null);
             expect(gt.locale).to.equal('');
             gt.setLocale(123);
             expect(gt.locale).to.equal('');
             gt.setLocale(false);
             expect(gt.locale).to.equal('');
-            gt.setLocale(function() {});
+            gt.setLocale(() => {});
             expect(gt.locale).to.equal('');
             gt.setLocale(NaN);
             expect(gt.locale).to.equal('');
@@ -105,12 +107,12 @@ describe('Gettext', function() {
         });
     });
 
-    describe('#setTextDomain', function() {
-        it('should default to "messages"', function() {
+    describe('#setTextDomain', () => {
+        it('should default to "messages"', () => {
             expect(gt.domain).to.equal('messages');
         });
 
-        it('should accept and store any string as domain name', function() {
+        it('should accept and store any string as domain name', () => {
             gt.setTextDomain('mydomain');
             expect(gt.domain).to.equal('mydomain');
             gt.setTextDomain('01234');
@@ -119,14 +121,14 @@ describe('Gettext', function() {
             expect(gt.domain).to.equal('');
         });
 
-        it('should reject non-string domains', function() {
+        it('should reject non-string domains', () => {
             gt.setTextDomain(null);
             expect(gt.domain).to.equal('messages');
             gt.setTextDomain(123);
             expect(gt.domain).to.equal('messages');
             gt.setTextDomain(false);
             expect(gt.domain).to.equal('messages');
-            gt.setTextDomain(function() {});
+            gt.setTextDomain(() => {});
             expect(gt.domain).to.equal('messages');
             gt.setTextDomain(NaN);
             expect(gt.domain).to.equal('messages');
@@ -135,78 +137,78 @@ describe('Gettext', function() {
         });
     });
 
-    describe('Resolve translations', function() {
-        beforeEach(function() {
+    describe('Resolve translations', () => {
+        beforeEach(() => {
             gt.addTranslations('et-EE', 'messages', jsonFile);
             gt.setLocale('et-EE');
         });
 
-        describe('#dnpgettext', function() {
-            it('should return singular match from default context', function() {
+        describe('#dnpgettext', () => {
+            it('should return singular match from default context', () => {
                 expect(gt.dnpgettext('messages', '', 'o2-1', 'o2-2', 1)).to.equal('t2-1');
             });
 
-            it('should return plural match from default context', function() {
+            it('should return plural match from default context', () => {
                 expect(gt.dnpgettext('messages', '', 'o2-1', 'o2-2', 2)).to.equal('t2-2');
             });
 
-            it('should return singular match from selected context', function() {
+            it('should return singular match from selected context', () => {
                 expect(gt.dnpgettext('messages', 'c2', 'co2-1', 'co2-2', 1)).to.equal('ct2-1');
             });
 
-            it('should return plural match from selected context', function() {
+            it('should return plural match from selected context', () => {
                 expect(gt.dnpgettext('messages', 'c2', 'co2-1', 'co2-2', 2)).to.equal('ct2-2');
             });
 
-            it('should return singular match for non existing domain', function() {
+            it('should return singular match for non existing domain', () => {
                 expect(gt.dnpgettext('cccc', '', 'o2-1', 'o2-2', 1)).to.equal('o2-1');
             });
         });
 
-        describe('#gettext', function() {
-            it('should return singular from default context', function() {
+        describe('#gettext', () => {
+            it('should return singular from default context', () => {
                 expect(gt.gettext('o2-1')).to.equal('t2-1');
             });
         });
 
-        describe('#dgettext', function() {
-            it('should return singular from default context', function() {
+        describe('#dgettext', () => {
+            it('should return singular from default context', () => {
                 expect(gt.dgettext('messages', 'o2-1')).to.equal('t2-1');
             });
         });
 
-        describe('#ngettext', function() {
-            it('should return plural from default context', function() {
+        describe('#ngettext', () => {
+            it('should return plural from default context', () => {
                 expect(gt.ngettext('o2-1', 'o2-2', 2)).to.equal('t2-2');
             });
         });
 
-        describe('#dngettext', function() {
-            it('should return plural from default context', function() {
+        describe('#dngettext', () => {
+            it('should return plural from default context', () => {
                 expect(gt.dngettext('messages', 'o2-1', 'o2-2', 2)).to.equal('t2-2');
             });
         });
 
-        describe('#pgettext', function() {
-            it('should return singular from selected context', function() {
+        describe('#pgettext', () => {
+            it('should return singular from selected context', () => {
                 expect(gt.pgettext('c2', 'co2-1')).to.equal('ct2-1');
             });
         });
 
-        describe('#dpgettext', function() {
-            it('should return singular from selected context', function() {
+        describe('#dpgettext', () => {
+            it('should return singular from selected context', () => {
                 expect(gt.dpgettext('messages', 'c2', 'co2-1')).to.equal('ct2-1');
             });
         });
 
-        describe('#npgettext', function() {
-            it('should return plural from selected context', function() {
+        describe('#npgettext', () => {
+            it('should return plural from selected context', () => {
                 expect(gt.npgettext('c2', 'co2-1', 'co2-2', 2)).to.equal('ct2-2');
             });
         });
 
-        describe('#getComment', function() {
-            it('should return comments object', function() {
+        describe('#getComment', () => {
+            it('should return comments object', () => {
                 expect(gt.getComment('messages', '', 'test')).to.deep.equal({
                     translator: 'Normal comment line 1\nNormal comment line 2',
                     extracted: 'Editors note line 1\nEditors note line 2',
@@ -218,12 +220,12 @@ describe('Gettext', function() {
         });
     });
 
-    describe('Unresolvable transaltions', function() {
-        beforeEach(function() {
+    describe('Unresolvable transaltions', () => {
+        beforeEach(() => {
             gt.addTranslations('et-EE', 'messages', jsonFile);
         });
 
-        it('should pass msgid when no translation is found', function() {
+        it('should pass msgid when no translation is found', () => {
             expect(gt.gettext('unknown phrase')).to.equal('unknown phrase');
             expect(gt.dnpgettext('unknown domain', null, 'hello')).to.equal('hello');
             expect(gt.dnpgettext('messages', 'unknown context', 'hello')).to.equal('hello');
@@ -232,40 +234,40 @@ describe('Gettext', function() {
             expect(gt.dnpgettext('messages', '', 'o2-1')).to.equal('o2-1');
         });
 
-        it('should pass unresolved singular message when count is 1', function() {
+        it('should pass unresolved singular message when count is 1', () => {
             expect(gt.dnpgettext('messages', '', '0 matches', 'multiple matches', 1)).to.equal('0 matches');
         });
 
-        it('should pass unresolved plural message when count > 1', function() {
+        it('should pass unresolved plural message when count > 1', () => {
             expect(gt.dnpgettext('messages', '', '0 matches', 'multiple matches', 100)).to.equal('multiple matches');
         });
     });
 
-    describe('Events', function() {
-        var errorListener;
+    describe('Events', () => {
+        let errorListener;
 
-        beforeEach(function() {
+        beforeEach(() => {
             errorListener = sinon.spy();
             gt.on('error', errorListener);
         });
 
-        it('should notify a registered listener of error events', function() {
+        it('should notify a registered listener of error events', () => {
             gt.emit('error', 'Something went wrong');
             expect(errorListener.callCount).to.equal(1);
         });
 
-        it('should deregister a previously registered event listener', function() {
+        it('should deregister a previously registered event listener', () => {
             gt.off('error', errorListener);
             gt.emit('error', 'Something went wrong');
             expect(errorListener.callCount).to.equal(0);
         });
 
-        it('should emit an error event when a locale that has no translations is set', function() {
+        it('should emit an error event when a locale that has no translations is set', () => {
             gt.setLocale('et-EE');
             expect(errorListener.callCount).to.equal(1);
         });
 
-        it('should emit an error event when no locale has been set', function() {
+        it('should emit an error event when no locale has been set', () => {
             gt.addTranslations('et-EE', 'messages', jsonFile);
             gt.gettext('o2-1');
             expect(errorListener.callCount).to.equal(1);
@@ -274,23 +276,23 @@ describe('Gettext', function() {
             expect(errorListener.callCount).to.equal(1);
         });
 
-        it('should emit an error event when a translation is missing', function() {
+        it('should emit an error event when a translation is missing', () => {
             gt.addTranslations('et-EE', 'messages', jsonFile);
             gt.setLocale('et-EE');
             gt.gettext('This message is not translated');
             expect(errorListener.callCount).to.equal(1);
         });
 
-        it('should not emit any error events when a translation is found', function() {
+        it('should not emit any error events when a translation is found', () => {
             gt.addTranslations('et-EE', 'messages', jsonFile);
             gt.setLocale('et-EE');
             gt.gettext('o2-1');
             expect(errorListener.callCount).to.equal(0);
         });
 
-        it('should not emit any error events when the current locale is the default locale', function() {
-            var gtd = new Gettext({ sourceLocale: 'en-US' });
-            var errorListenersourceLocale = sinon.spy();
+        it('should not emit any error events when the current locale is the default locale', () => {
+            let gtd = new Gettext({ sourceLocale: 'en-US' });
+            let errorListenersourceLocale = sinon.spy();
             gtd.on('error', errorListenersourceLocale);
             gtd.setLocale('en-US');
             gtd.gettext('This message is not translated');
@@ -298,15 +300,15 @@ describe('Gettext', function() {
         });
     });
 
-    describe('Aliases', function() {
-        it('should forward textdomain(domain) to setTextDomain(domain)', function() {
+    describe('Aliases', () => {
+        it('should forward textdomain(domain) to setTextDomain(domain)', () => {
             sinon.stub(gt, 'setTextDomain');
             gt.textdomain('messages');
             expect(gt.setTextDomain.calledWith('messages'));
             gt.setTextDomain.restore();
         });
 
-        it('should forward setlocale(locale) to setLocale(locale)', function() {
+        it('should forward setlocale(locale) to setLocale(locale)', () => {
             sinon.stub(gt, 'setLocale');
             gt.setLocale('et-EE');
             expect(gt.setLocale.calledWith('et-EE'));
