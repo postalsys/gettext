@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/postalsys/gettext/compare/v4.0.0...v4.0.1) (2024-10-15)
+
+
+### Bug Fixes
+
+* **addTranslations:** Fixed domain value check ([c2bf8dc](https://github.com/postalsys/gettext/commit/c2bf8dc8266e2eca748324bb2fc22a24f03beade))
+
 ## 4.0.0 (2024-09-19)
 
 
