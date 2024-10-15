@@ -23,23 +23,23 @@ npm install @postalsys/gettext
 ### Create a new Gettext object
 
 ```js
-var Gettext = require("@postalsys/gettext");
+var Gettext = require('@postalsys/gettext');
 
 var gt = new Gettext();
 ```
 
 ### Check or change default language
 
-_textdomain(domain)_
+_setTextDomain(domain)_
 
 ```js
-gt.textdomain("et");
+gt.setTextDomain('et');
 ```
 
 The function also returns the current texdomain value
 
 ```js
-var curlang = gt.textdomain();
+var curlang = gt.setTextDomain();
 ```
 
 ## Translation methods
@@ -49,7 +49,7 @@ var curlang = gt.textdomain();
 _gettext(msgid)_
 
 ```js
-var greeting = gt.gettext("Hello!");
+var greeting = gt.gettext('Hello!');
 ```
 
 ### Load a string from a specific language file
@@ -57,7 +57,7 @@ var greeting = gt.gettext("Hello!");
 _dgettext(domain, msgid)_
 
 ```js
-var greeting = gt.dgettext("et", "Hello!");
+var greeting = gt.dgettext('et', 'Hello!');
 ```
 
 ### Load a plural string from default language file
@@ -65,7 +65,7 @@ var greeting = gt.dgettext("et", "Hello!");
 _ngettext(msgid, msgid_plural, count)_
 
 ```js
-gt.ngettext("%d Comment", "%d Comments", 10);
+gt.ngettext('%d Comment', '%d Comments', 10);
 ```
 
 ### Load a plural string from a specific language file
@@ -73,7 +73,7 @@ gt.ngettext("%d Comment", "%d Comments", 10);
 _dngettext(domain, msgid, msgid_plural, count)_
 
 ```js
-gt.dngettext("et", "%d Comment", "%d Comments", 10);
+gt.dngettext('et', '%d Comment', '%d Comments', 10);
 ```
 
 ### Load a string of a specific context
@@ -81,7 +81,7 @@ gt.dngettext("et", "%d Comment", "%d Comments", 10);
 _pgettext(msgctxt, msgid)_
 
 ```js
-gt.pgettext("menu items", "File");
+gt.pgettext('menu items', 'File');
 ```
 
 ### Load a string of a specific context from specific language file
@@ -89,7 +89,7 @@ gt.pgettext("menu items", "File");
 _dpgettext(domain, msgctxt, msgid)_
 
 ```js
-gt.dpgettext("et", "menu items", "File");
+gt.dpgettext('et', 'menu items', 'File');
 ```
 
 ### Load a plural string of a specific context
@@ -97,7 +97,7 @@ gt.dpgettext("et", "menu items", "File");
 _npgettext(msgctxt, msgid, msgid_plural, count)_
 
 ```js
-gt.npgettext("menu items", "%d Recent File", "%d Recent Files", 3);
+gt.npgettext('menu items', '%d Recent File', '%d Recent Files', 3);
 ```
 
 ### Load a plural string of a specific context from specific language file
@@ -105,7 +105,7 @@ gt.npgettext("menu items", "%d Recent File", "%d Recent Files", 3);
 _dnpgettext(domain, msgctxt, msgid, msgid_plural, count)_
 
 ```js
-gt.dnpgettext("et", "menu items", "%d Recent File", "%d Recent Files", 3);
+gt.dnpgettext('et', 'menu items', '%d Recent File', '%d Recent Files', 3);
 ```
 
 ### Get comments for a translation (if loaded from PO)
@@ -113,7 +113,7 @@ gt.dnpgettext("et", "menu items", "%d Recent File", "%d Recent Files", 3);
 _getComment(domain, msgctxt, msgid)_
 
 ```js
-gt.getComment("et", "menu items", "%d Recent File");
+gt.getComment('et', 'menu items', '%d Recent File');
 ```
 
 Returns an object in the form of `{translator: "", extracted: "", reference: "", flag: "", previous: ""}`

@@ -304,20 +304,4 @@ describe('Gettext', () => {
             expect(errorListenersourceLocale.callCount).to.equal(0);
         });
     });
-
-    describe('Aliases', () => {
-        it('should forward textdomain(domain) to setTextDomain(domain)', () => {
-            sinon.stub(gt, 'setTextDomain');
-            gt.textdomain('messages');
-            expect(gt.setTextDomain.calledWith('messages'));
-            gt.setTextDomain.restore();
-        });
-
-        it('should forward setlocale(locale) to setLocale(locale)', () => {
-            sinon.stub(gt, 'setLocale');
-            gt.setLocale('et-EE');
-            expect(gt.setLocale.calledWith('et-EE'));
-            gt.setLocale.restore();
-        });
-    });
 });

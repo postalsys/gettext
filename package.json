@@ -5,8 +5,8 @@
     "author": "Andris Reinman",
     "maintainers": [
         {
-            "name": "Alexander Wallin",
-            "email": "office@alexanderwallin.com"
+            "name": "Andris Reinman",
+            "email": "andris@reinman.eu"
         }
     ],
     "homepage": "http://github.com/postalsys/gettext",
@@ -43,12 +43,12 @@
         "grunt-contrib-jshint": "3.2.0",
         "grunt-eslint": "24.3.0",
         "grunt-mocha-test": "0.13.3",
-        "jsdoc-to-markdown": "9.0.1",
+        "jsdoc-to-markdown": "9.0.2",
         "mocha": "10.7.3",
         "sinon": "19.0.2"
     },
     "engine": {
-        "node": ">=10"
+        "node": ">=16"
     },
     "keywords": [
         "i18n",

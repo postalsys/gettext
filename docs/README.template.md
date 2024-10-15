@@ -1,48 +1,53 @@
-A fork of [alexanderwallin/node-gettext](http://github.com/alexanderwallin/node-gettext)
-
 # @postalsys/gettext
 
-**`@postalsys/gettext`** is a JavaScript implementation of (a large subset of) [gettext](https://www.gnu.org/software/gettext/gettext.html), a localization framework originally written in C.
+> **Note:** This is a fork of [alexanderwallin/node-gettext](https://github.com/alexanderwallin/node-gettext) with additional enhancements and maintenance updates.
 
-If you just want to parse or compile mo/po files, for use with this library or elsewhere, check out [gettext-parser](https://github.com/smhg/gettext-parser).
+**`@postalsys/gettext`** is a JavaScript implementation of a substantial subset of [GNU gettext](https://www.gnu.org/software/gettext/), a powerful localization framework originally written in C. This library enables developers to internationalize their JavaScript applications by handling translations, plural forms, and contexts, closely mirroring the functionality of the original gettext.
+
+If you're interested in parsing or compiling `.mo`/`.po` files for use with this library or elsewhere, consider using [gettext-parser](https://github.com/smhg/gettext-parser).
+
+## Table of Contents
 
 -   [Features](#features)
     -   [Differences from GNU gettext](#differences-from-gnu-gettext)
 -   [Installation](#installation)
 -   [Usage](#usage)
-    -   [Error events](#error-events)
+    -   [Basic Example](#basic-example)
+    -   [Error Events](#error-events)
     -   [Recipes](#recipes)
--   [API](#api)
+        -   [Loading Translations from .mo or .po Files](#loading-translations-from-mo-or-po-files)
+-   [API Reference](#api-reference)
+-   [Contributing](#contributing)
 -   [License](#license)
--   [See also](#see-also)
+-   [See Also](#see-also)
 
 ## Features
 
--   Supports domains, contexts and plurals
--   Supports .json, .mo and .po files with the help of [gettext-parser](https://github.com/smhg/gettext-parser)
--   Ships with plural forms for 136 languages
--   Change locale or domain on the fly
--   Useful error messages enabled by a `debug` option
--   Emits events for internal errors, such as missing translations
+-   **Comprehensive Localization Support**: Handles domains, contexts, plurals, and more.
+-   **File Format Compatibility**: Supports `.json`, `.mo`, and `.po` files via [gettext-parser](https://github.com/smhg/gettext-parser).
+-   **Extensive Language Support**: Includes plural forms for 136 languages.
+-   **Dynamic Configuration**: Allows changing locale or domain at runtime.
+-   **Debugging Tools**: Provides detailed error messages when the `debug` option is enabled.
+-   **Event Emission**: Emits events for internal errors, such as missing translations.
 
 ### Differences from GNU gettext
 
-There are two main differences between `@postalsys/gettext` and GNU's gettext:
+While `@postalsys/gettext` aims to closely emulate GNU gettext, there are notable differences:
 
-1. **There are no categories.** GNU gettext features [categories such as `LC_MESSAGES`, `LC_NUMERIC` and `LC_MONETARY`](https://www.gnu.org/software/gettext/manual/gettext.html#Locale-Environment-Variables), but since there already is a plethora of great JavaScript libraries to deal with numbers, currencies, dates etc, `@postalsys/gettext` is simply targeted towards strings/phrases. You could say it just assumes the `LC_MESSAGES` category at all times.
-2. **You have to read translation files from the file system yourself.** GNU gettext is a C library that reads files from the file system. This is done using `bindtextdomain(domain, localesDirPath)` and `setlocale(category, locale)`, where these four parameters combined are used to read the appropriate translations file.
-
-However, since `@postalsys/gettext` needs to work both on the server in web browsers (which usually is referred to as it being _universal_ or _isomorphic_ JavaScript), it is up to the developer to read translation files from disk or somehow provide it with translations as pure JavaScript objects using [`addTranslations(locale, domain, translations)`](#gettextsetlocalelocale).
-
-`bindtextdomain` will be provided as an optional feature in a future release.
+1. **No Category Support**: Unlike GNU gettext, which supports categories like `LC_MESSAGES`, `LC_NUMERIC`, and `LC_MONETARY`, this library focuses solely on message localization, effectively always operating under the `LC_MESSAGES` category. For number formatting, currencies, dates, and other localization needs, consider using dedicated JavaScript libraries.
+2. **Manual Translation Loading**: GNU gettext automatically reads translation files from the filesystem based on locale and category settings. In contrast, `@postalsys/gettext` requires developers to manually load and provide translations, accommodating both server-side and client-side environments.
 
 ## Installation
 
+Install the package via npm:
+
 ```sh
-npm install --save @postalsys/gettext
+npm install @postalsys/gettext
 ```
 
 ## Usage
+
+### Basic Example
 
 ```js
 const Gettext = require('@postalsys/gettext');
@@ -52,27 +57,30 @@ const gt = new Gettext();
 gt.addTranslations('sv-SE', 'messages', swedishTranslations);
 gt.setLocale('sv-SE');
 
-gt.gettext('The world is a funny place');
-// -> "Världen är en underlig plats"
+console.log(gt.gettext('The world is a funny place'));
+// Output: "Världen är en underlig plats"
 ```
 
-### Error events
+### Error Events
+
+`@postalsys/gettext` emits an `error` event when it encounters issues such as missing translations. You can handle these events as follows:
 
 ```js
-// Add translations etc...
+// Set up your Gettext instance and add translations...
 
-gt.on('error', error => console.log('oh nose', error));
+gt.on('error', error => {
+    console.error('Translation error:', error.message);
+});
+
 gt.gettext('An unrecognized message');
-// -> 'oh nose', 'An unrecognized message'
+// Logs: 'Translation error: No translation found for msgid "An unrecognized message"'
 ```
 
 ### Recipes
 
-#### Load and add translations from .mo or .po files
+#### Loading Translations from .mo or .po Files
 
-`@postalsys/gettext` expects all translations to be in the format specified by [`gettext-parser`](https://github.com/smhg/gettext-parser). Therefor, you should use that to parse .mo or .po files.
-
-Here is an example where we read a bunch of translation files from disk and add them to our `Gettext` instance:
+`@postalsys/gettext` works seamlessly with translations parsed by [`gettext-parser`](https://github.com/smhg/gettext-parser). Here's how you can load translations from `.po` files:
 
 ```js
 const fs = require('fs');
@@ -80,8 +88,7 @@ const path = require('path');
 const Gettext = require('@postalsys/gettext');
 const { po } = require('gettext-parser');
 
-// In this example, our translations are found at
-// path/to/locales/LOCALE/DOMAIN.po
+// Directory where your translations are stored
 const translationsDir = 'path/to/locales';
 const locales = ['en', 'fi-FI', 'sv-SE'];
 const domain = 'messages';
@@ -89,26 +96,30 @@ const domain = 'messages';
 const gt = new Gettext();
 
 locales.forEach(locale => {
-    const fileName = `${domain}.po`;
+    const filename = `${domain}.po`;
     const translationsFilePath = path.join(translationsDir, locale, filename);
-    const translationsContent = fs.readSync(translationsFilePath);
+    const translationsContent = fs.readFileSync(translationsFilePath);
 
     const parsedTranslations = po.parse(translationsContent);
     gt.addTranslations(locale, domain, parsedTranslations);
 });
+
+gt.setLocale('sv-SE');
+console.log(gt.gettext('Hello'));
+// Outputs the translated string in Swedish
 ```
 
-## API
+## API Reference
 
 {{>main}}
 
 ## License
 
-MIT
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-## See also
+## See Also
 
--   [gettext-parser](https://github.com/smhg/gettext-parser) - Parsing and compiling gettext translations between .po/.mo files and JSON
--   [lioness](https://github.com/alexanderwallin/lioness) – Gettext library for React
--   [react-gettext-parser](https://github.com/lagetse/react-gettext-parser) - Extracting gettext translatable strings from JS(X) code
--   [narp](https://github.com/lagetse/narp) - Workflow CLI tool that syncs translations between your app and Transifex
+-   [gettext-parser](https://github.com/smhg/gettext-parser) - Parse and compile gettext translations between `.po`/`.mo` files and JSON.
+-   [lioness](https://github.com/alexanderwallin/lioness) - Gettext library for React applications.
+-   [react-gettext-parser](https://github.com/lagetse/react-gettext-parser) - Extract translatable strings from React components.
+-   [narp](https://github.com/lagetse/narp) - CLI tool for synchronizing translations between your app and Transifex.
