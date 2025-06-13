@@ -1,7 +1,7 @@
 {
     "name": "@postalsys/gettext",
     "description": "A JavaScript implementation of gettext, a localization framework",
-    "version": "4.0.1",
+    "version": "4.1.0",
     "author": "Andris Reinman",
     "maintainers": [
         {

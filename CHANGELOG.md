@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/postalsys/gettext/compare/v4.0.1...v4.1.0) (2025-06-13)
+
+
+### Features
+
+* gt.useLocale(locale) ([7e1e4de](https://github.com/postalsys/gettext/commit/7e1e4debfe22d95044e38c01250dbf0ed011386b))
+
 ## [4.0.1](https://github.com/postalsys/gettext/compare/v4.0.0...v4.0.1) (2024-10-15)
 
 
