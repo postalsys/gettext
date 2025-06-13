@@ -220,6 +220,78 @@ describe('Gettext', () => {
         });
     });
 
+    describe('Resolve translations with useLocale', () => {
+        let localGt = new Gettext({ sourceLocale: 'en_US' });
+        beforeEach(() => {
+            gt.addTranslations('et-EE', 'messages', jsonFile);
+            localGt = gt.useLocale('et-EE');
+        });
+
+        describe('#dnpgettext', () => {
+            it('should return singular match from default context', () => {
+                expect(localGt.dnpgettext('messages', '', 'o2-1', 'o2-2', 1)).to.equal('t2-1');
+            });
+
+            it('should return plural match from default context', () => {
+                expect(localGt.dnpgettext('messages', '', 'o2-1', 'o2-2', 2)).to.equal('t2-2');
+            });
+
+            it('should return singular match from selected context', () => {
+                expect(localGt.dnpgettext('messages', 'c2', 'co2-1', 'co2-2', 1)).to.equal('ct2-1');
+            });
+
+            it('should return plural match from selected context', () => {
+                expect(localGt.dnpgettext('messages', 'c2', 'co2-1', 'co2-2', 2)).to.equal('ct2-2');
+            });
+
+            it('should return singular match for non existing domain', () => {
+                expect(localGt.dnpgettext('cccc', '', 'o2-1', 'o2-2', 1)).to.equal('o2-1');
+            });
+        });
+
+        describe('#gettext', () => {
+            it('should return singular from default context', () => {
+                expect(localGt.gettext('o2-1')).to.equal('t2-1');
+            });
+        });
+
+        describe('#dgettext', () => {
+            it('should return singular from default context', () => {
+                expect(localGt.dgettext('messages', 'o2-1')).to.equal('t2-1');
+            });
+        });
+
+        describe('#ngettext', () => {
+            it('should return plural from default context', () => {
+                expect(localGt.ngettext('o2-1', 'o2-2', 2)).to.equal('t2-2');
+            });
+        });
+
+        describe('#dngettext', () => {
+            it('should return plural from default context', () => {
+                expect(localGt.dngettext('messages', 'o2-1', 'o2-2', 2)).to.equal('t2-2');
+            });
+        });
+
+        describe('#pgettext', () => {
+            it('should return singular from selected context', () => {
+                expect(localGt.pgettext('c2', 'co2-1')).to.equal('ct2-1');
+            });
+        });
+
+        describe('#dpgettext', () => {
+            it('should return singular from selected context', () => {
+                expect(localGt.dpgettext('messages', 'c2', 'co2-1')).to.equal('ct2-1');
+            });
+        });
+
+        describe('#npgettext', () => {
+            it('should return plural from selected context', () => {
+                expect(localGt.npgettext('c2', 'co2-1', 'co2-2', 2)).to.equal('ct2-2');
+            });
+        });
+    });
+
     describe('Unresolvable transaltions', () => {
         beforeEach(() => {
             gt.addTranslations('et-EE', 'messages', jsonFile);
