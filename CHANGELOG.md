@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.1](https://github.com/postalsys/gettext/compare/v4.1.0...v4.1.1) (2026-01-05)
+
+
+### Bug Fixes
+
+* **dependencies:** remove `lodash.get` ([#4](https://github.com/postalsys/gettext/issues/4)) ([bbbad07](https://github.com/postalsys/gettext/commit/bbbad07d01a5248ebf47d45200cd0611fc3a619c))
+
 ## [4.1.0](https://github.com/postalsys/gettext/compare/v4.0.1...v4.1.0) (2025-06-13)
 
 
