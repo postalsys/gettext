@@ -146,6 +146,16 @@ describe('parseMo', () => {
                     ])
                 );
             }
+            // every byte of windows-1252, including the ones it leaves undefined
+            const allBytes = Buffer.from(Array.from({ length: 255 }, (_, i) => i + 1));
+            for (const charset of ['windows-1252', 'cp1252', 'WIN1252']) {
+                compare(
+                    writeMo([
+                        ['', header(charset)],
+                        ['a', allBytes]
+                    ])
+                );
+            }
             assert.strictEqual(compare(writeMo([['', header('UTF8')]])).charset, 'utf-8');
             assert.strictEqual(compare(writeMo([['', header('WIN1257')]])).charset, 'windows-1257');
             assert.strictEqual(

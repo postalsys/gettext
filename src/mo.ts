@@ -39,6 +39,13 @@ const HEADERS = new Map([
 // Labels that decode byte for byte. TextDecoder maps these to windows-1252, which differs in 0x80-0x9f
 const LATIN1 = new Set(['iso-8859-1', 'iso8859-1', 'iso_8859-1', 'latin1', 'l1', 'cp819', 'ibm819']);
 
+// windows-1252 is decoded here too: Node 20's TextDecoder decodes it as ISO-8859-1. The characters
+// of 0x80-0x9f, with U+FFFD for the bytes the code page leaves undefined, as iconv-lite decodes them
+const WINDOWS_1252 = new Set(['windows-1252', 'cp1252', 'x-cp1252']);
+const WINDOWS_1252_C1 =
+    '\u20ac\ufffd\u201a\u0192\u201e\u2026\u2020\u2021\u02c6\u2030\u0160\u2039\u0152\ufffd\u017d\ufffd' +
+    '\ufffd\u2018\u2019\u201c\u201d\u2022\u2013\u2014\u02dc\u2122\u0161\u203a\u0153\ufffd\u017e\u0178';
+
 /**
  * Sets a property as an own data property, so a key read from the file such as "__proto__"
  * can not replace the prototype of the object it is stored in.
@@ -70,6 +77,9 @@ function getDecoder(charset: string): (bytes: Buffer) => string {
     }
     if (LATIN1.has(charset)) {
         return bytes => bytes.toString('latin1');
+    }
+    if (WINDOWS_1252.has(charset)) {
+        return bytes => bytes.toString('latin1').replace(/[\u0080-\u009f]/g, c => WINDOWS_1252_C1.charAt(c.charCodeAt(0) - 0x80));
     }
     if (charset === 'ascii') {
         // TextDecoder maps "ascii" to windows-1252 as well, gettext-parser replaces every byte above 0x7f
