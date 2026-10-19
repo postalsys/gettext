@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm test                  # run the full suite (node --test test/*-test.js)
 npm run test:coverage     # the suite under c8
+npm run test:cjs          # the suite with require(esm) disabled (CommonJS guard)
 npm run lint              # eslint .
 npm run lint:fix          # eslint . --fix
 npm run format            # prettier --write .
@@ -22,9 +23,17 @@ node --test test/gettext-test.js
 node --test --test-name-pattern="should return plural from default context" test/gettext-test.js
 ```
 
+## Platform constraints
+
+The main consumer is EmailEngine (`lib/translations.js` there), which ships as a standalone binary built with `@yao-pkg/pkg`. That binary snapshots a CommonJS module graph and cannot load ES modules, and EmailEngine supports Node 20 and later. Two rules follow:
+
+- **Node.js 20 is the minimum.** Runtime code, tests and tooling must work on Node 20, 22 and 24 (`engines.node` is `>=20.0.0`; CI runs all three).
+- **Everything that reaches runtime must be genuinely CommonJS.** All source uses `require`/`module.exports`. `require()` of the package must work with `--no-experimental-require-module`: Node 22+ (and 20.19) load ESM through `require()` by default, which would hide an ESM-only dependency until the pkg binary fails. A CJS wrapper around a dynamic `import()` does not count. Never add or upgrade to an ESM-only dependency; pin the last CommonJS major in `.ncurc.js` (`reject` or `target`) with a comment giving the reason.
+
+Check with `npm run test:cjs`, which runs the full suite under `NODE_OPTIONS=--no-experimental-require-module`. CI runs it on Node 22.x and 24.x, the versions where require(esm) is on by default.
+
 ## Critical constraints
 
-- **CommonJS only, never ESM.** The main consumer is EmailEngine (`lib/translations.js` there), which is bundled into standalone binaries with `@yao-pkg/pkg` and cannot load pure-ESM packages. All source uses `require`/`module.exports`. `.ncurc.js` carries a `reject` list for upgrades that move to pure ESM.
 - **No runtime dependencies.** The package ships `lib/` with nothing in `dependencies`. Keep it that way unless there is a strong reason. `gettext-parser` (maintained upstream by smhg, not by us) is only referenced in docs: callers parse `.po`/`.mo` files with it and pass the resulting JSON shape to `addTranslations()`.
 - **README.md is generated.** Edit `docs/README.template.md` or the JSDoc comments in `lib/gettext.js`, then run `npm run docs`. README.md, `docs/` and `test/fixtures/` are excluded from Prettier (the jsdoc2md Handlebars partials do not parse, and fixtures must stay byte-identical).
 - **Releases are automated via release-please** (`.github/workflows/release.yaml`, publishes to npm with provenance). The version in `package.json` and `CHANGELOG.md` are owned by the bot, do not bump them by hand.
