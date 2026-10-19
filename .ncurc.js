@@ -1,10 +1,9 @@
+'use strict';
+
 module.exports = {
     upgrade: true,
-    reject: [
-        // Block package upgrades that moved to ESM
-        'chai',
-        // API changes in newer eslint versions
-        'grunt-eslint',
-        'eslint'
-    ]
+    // This package is consumed by EmailEngine, which is bundled into standalone
+    // binaries with @yao-pkg/pkg and only supports CommonJS. Reject upgrades of
+    // any dependency that moves to pure ESM.
+    reject: []
 };
