@@ -1,5 +1,14 @@
 # Changelog
 
+## [4.1.2](https://github.com/postalsys/gettext/compare/v4.1.1...v4.1.2) (2026-10-19)
+
+
+### Bug Fixes
+
+* name the received type and the right method in invalid argument warnings ([467e1ef](https://github.com/postalsys/gettext/commit/467e1efb8c9fbe81f27cfb5270fc1bbb28bff576))
+* read plural forms from the catalog header for languages missing from the plural table ([defa77a](https://github.com/postalsys/gettext/commit/defa77a68d1ad9329a575f2432ad950f9c8ee1b0))
+* resolve msgids named after Object.prototype members through own properties only ([fb60db7](https://github.com/postalsys/gettext/commit/fb60db7b1e696d9fc5878ee794c8fcc666006290))
+
 ## [4.1.1](https://github.com/postalsys/gettext/compare/v4.1.0...v4.1.1) (2026-01-05)
 
 
