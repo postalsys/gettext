@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -75,10 +76,21 @@ describe('Built package', { timeout: 30 * 1000, skip: hasDist ? false : 'dist/ i
     });
 
     it('packs the build and leaves the sources and tests out', () => {
-        // --ignore-scripts: prepare would rebuild dist/ under the running suite
-        const result = spawnSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], { cwd: root, encoding: 'utf8' });
-        assert.strictEqual(result.status, 0, result.stderr);
-        const files: string[] = JSON.parse(result.stdout)[0].files.map((file: { path: string }) => file.path);
+        // Packs a copy without the lifecycle scripts: prepare would rebuild dist/ under the test
+        // files running in parallel, and npm 10 (Node 20 and 22) runs it on pack even with
+        // --ignore-scripts
+        const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'gettext-pack-'));
+        let files: string[];
+        try {
+            fs.cpSync(root, dir, { recursive: true, filter: source => !/^(node_modules|\.git|coverage)$/.test(path.relative(root, source)) });
+            const { scripts: _scripts, ...manifest } = pkg;
+            fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify(manifest, null, 4));
+            const result = spawnSync('npm', ['pack', '--dry-run', '--json'], { cwd: dir, encoding: 'utf8' });
+            assert.strictEqual(result.status, 0, result.stderr);
+            files = JSON.parse(result.stdout)[0].files.map((file: { path: string }) => file.path);
+        } finally {
+            fs.rmSync(dir, { recursive: true, force: true });
+        }
         for (const name of MODULES) {
             for (const format of ['cjs', 'esm']) {
                 assert.ok(files.includes(`dist/${format}/${name}.js`), `dist/${format}/${name}.js is packed`);
