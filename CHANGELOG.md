@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.3.0](https://github.com/postalsys/gettext/compare/v4.2.0...v4.3.0) (2026-10-19)
+
+
+### Features
+
+* add a .mo catalog reader ([4597e71](https://github.com/postalsys/gettext/commit/4597e71ab1b5399df28b8fd71fc3c1fb08c3b9ca))
+
+
+### Bug Fixes
+
+* decode windows-1252 catalogs the same way on Node 20 ([484cdd8](https://github.com/postalsys/gettext/commit/484cdd8bbc1bd2cc065fd2c4d356294513964f81))
+
 ## [4.2.0](https://github.com/postalsys/gettext/compare/v4.1.2...v4.2.0) (2026-10-19)
 
 
