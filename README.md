@@ -25,7 +25,7 @@ If you're interested in parsing or compiling `.mo`/`.po` files for use with this
 
 -   **Comprehensive Localization Support**: Handles domains, contexts, plurals, and more.
 -   **File Format Compatibility**: Supports `.json`, `.mo`, and `.po` files via [gettext-parser](https://github.com/smhg/gettext-parser).
--   **Extensive Language Support**: Includes plural forms for 136 languages.
+-   **Extensive Language Support**: Includes plural forms for 136 languages, and reads the catalog's `Plural-Forms` header for any other language.
 -   **Dynamic Configuration**: Allows changing locale or domain at runtime.
 -   **Debugging Tools**: Provides detailed error messages when the `debug` option is enabled.
 -   **Event Emission**: Emits events for internal errors, such as missing translations.
