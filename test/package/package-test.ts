@@ -128,7 +128,11 @@ describe('Built package', { timeout: 30 * 1000, skip: hasDist ? false : 'dist/ i
             }
             // transpiled `import Gettext from '@postalsys/gettext'` reads .default; it must not show up as a key
             assert.strictEqual(Gettext.default, Gettext);
-            assert.deepStrictEqual(Object.keys(Gettext), []);
+            assert.deepStrictEqual(Object.keys(Gettext), ['parseMo']);
+            // the named parseMo export of the ES module build, reachable through destructuring
+            const { parseMo } = require(packageName);
+            assert.strictEqual(parseMo, Gettext.parseMo);
+            assert.strictEqual(typeof parseMo, 'function');
             assert.deepStrictEqual(Object.keys(new Gettext()), ['catalogs', 'locale', 'domain', 'listeners', 'sourceLocale', 'debug']);
         });
 
@@ -201,9 +205,10 @@ describe('Built package', { timeout: 30 * 1000, skip: hasDist ? false : 'dist/ i
             assert.notStrictEqual(byName.default, require(packageName));
         });
 
-        it('has the Gettext class as its only runtime export', async () => {
+        it('has the Gettext class and parseMo as its runtime exports', async () => {
             const mod = await import(packageName);
-            assert.deepStrictEqual(Object.keys(mod), ['default']);
+            assert.deepStrictEqual(Object.keys(mod).sort(), ['default', 'parseMo']);
+            assert.strictEqual(mod.parseMo, mod.default.parseMo);
             const Gettext = mod.default;
             assert.strictEqual(Gettext.name, 'Gettext');
             for (const method of GETTEXT_METHODS) {

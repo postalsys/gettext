@@ -41,14 +41,14 @@ function listFiles(dir, ext) {
 // imports still get the object, their interop helper wraps a module without
 // `__esModule`.
 //
-// A module that has a default export and named runtime exports can not get this
-// treatment, so the build fails for one: silently switching `require()` from the
-// class to the exports object would break `require('@postalsys/gettext')` callers.
+// A module that has a default export and named runtime exports keeps this treatment only when
+// every named export is also a property of the default export holding the same value (the
+// `parseMo` export of gettext.ts is the static `Gettext.parseMo`), so `require()` still reaches
+// it. Any other named export fails the build: silently switching `require()` from the class to
+// the exports object, or dropping the named export, would break `require('@postalsys/gettext')` callers.
 function applyCjsInterop(dir) {
-    const namedExport = /\bexports\.(?!default\b)[A-Za-z_$][\w$]*\s*=/;
-    const definedExport = /Object\.defineProperty\(exports,\s*"(?!__esModule")/;
-    const starExport = /__exportStar\(/;
     const defaultExport = /\bexports\.default\s*=/;
+    const starExport = /__exportStar\(/;
 
     for (const file of listFiles(dir, '.js')) {
         const source = fs.readFileSync(file, 'utf8');
@@ -56,10 +56,14 @@ function applyCjsInterop(dir) {
             continue;
         }
         const name = path.relative(dir, file);
-        if (namedExport.test(source) || definedExport.test(source) || starExport.test(source)) {
+        const mod = require(file);
+        const unmirrored = Object.keys(mod).filter(key => key !== 'default' && key !== '__esModule' && mod.default?.[key] !== mod[key]);
+        if (unmirrored.length || starExport.test(source)) {
             throw new Error(
                 name +
-                    ' has a default export and named runtime exports. Keep default-export modules default-only ' +
+                    ' has a default export and named runtime exports (' +
+                    (unmirrored.join(', ') || 'export *') +
+                    ') that are not properties of the default export. Keep default-export modules default-only ' +
                     '(attach extra values as properties of the exported class)'
             );
         }

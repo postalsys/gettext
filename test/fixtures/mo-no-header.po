@@ -1,0 +1,6 @@
+msgid "Hello"
+msgstr "Hallo"
+
+msgctxt "x"
+msgid "Hello"
+msgstr "Tere"

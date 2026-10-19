@@ -2,9 +2,11 @@ import plurals from './plurals.js';
 import { parsePluralForms, DEFAULT_PLURAL_FORMS } from './plural-forms.js';
 import type { PluralForms } from './plural-forms.js';
 import type { PluralRule } from './plurals.js';
+import { parseMo } from './mo.js';
 
 export type { PluralForms } from './plural-forms.js';
 export type { PluralExample, PluralRule } from './plurals.js';
+export type { MoCatalog, MoTranslation } from './mo.js';
 
 /** Translator comments of a catalog entry, as gettext-parser reads them */
 export interface TranslationComments {
@@ -121,6 +123,14 @@ class Gettext {
     listeners: GettextListener[];
     sourceLocale: string;
     debug: boolean;
+
+    /**
+     * Parses the contents of a .mo file into a catalog for addTranslations(), see parseMo()
+     *
+     * @example
+     *     gt.addTranslations('sv-SE', 'messages', Gettext.parseMo(fs.readFileSync('sv.mo')))
+     */
+    static parseMo: typeof parseMo = parseMo;
 
     /**
      * Returns the language code part of a locale
@@ -591,3 +601,6 @@ class Gettext {
 }
 
 export default Gettext;
+
+// Also reachable as Gettext.parseMo, which is what require() sees: the CommonJS build exports the class itself
+export { parseMo };

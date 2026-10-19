@@ -53,4 +53,15 @@ assert.strictEqual(localGt.ngettext('o2-1', 'o2-2', 2), 't2-2');
 assert.strictEqual(gt.useLocale('de').gettext('missing'), 'missing');
 assert.strictEqual(errors.length, 4, errors.join('\n'));
 
+// lib/translations.js reads its compiled catalogs with the .mo reader
+const fs = require('node:fs');
+const { parseMo } = require('@postalsys/gettext');
+assert.strictEqual(parseMo, Gettext.parseMo);
+const moCatalog = parseMo(fs.readFileSync(path.join(__dirname, '..', 'fixtures', 'mo-features.mo')));
+assert.strictEqual(moCatalog.charset, 'utf-8');
+gt.addTranslations('pl', 'messages', moCatalog);
+const plGt = gt.useLocale('pl');
+assert.strictEqual(plGt.pgettext('menu', 'Open'), 'Otwórz');
+assert.strictEqual(plGt.ngettext('One file', '%d files', 5), '%d plików');
+
 console.log('CommonJS smoke test passed (' + process.version + ', ' + (process.env.NODE_OPTIONS || 'no NODE_OPTIONS') + ')');

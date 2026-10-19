@@ -19,8 +19,8 @@ const hasDist = fs.existsSync(path.join(root, 'dist', 'cjs', 'gettext.d.ts')) &&
 
 // The documented API and the way EmailEngine calls it
 const consumer = `
-import Gettext from '@postalsys/gettext';
-import type { Catalog, GettextOptions, LocaleGettext, PluralRule, Translation } from '@postalsys/gettext';
+import Gettext, { parseMo } from '@postalsys/gettext';
+import type { Catalog, GettextOptions, LocaleGettext, MoCatalog, MoTranslation, PluralRule, Translation } from '@postalsys/gettext';
 import plurals from '@postalsys/gettext/lib/plurals';
 import { parsePluralForms, DEFAULT_PLURAL_FORMS } from '@postalsys/gettext/lib/plural-forms';
 
@@ -35,6 +35,12 @@ gt.setLocale('et');
 gt.setTextDomain('messages');
 gt.on('error', (err: Error) => err.message);
 gt.off('error', () => undefined);
+
+declare const moFile: Buffer;
+const moCatalog: MoCatalog = parseMo(moFile);
+const moEntry: MoTranslation | undefined = Gettext.parseMo(new Uint8Array(moFile), 'utf-8').translations['']?.['file'];
+gt.addTranslations('et', 'messages', moCatalog);
+const moHeaders: Record<string, string> | undefined = moCatalog.headers;
 
 const code: string = Gettext.getLanguageCode('et-EE');
 const local: LocaleGettext = gt.useLocale(code);
@@ -57,7 +63,7 @@ const rule: PluralRule | undefined = plurals['et'];
 const index: number | boolean | undefined = rule?.pluralsFunc(2);
 const parsed: number | undefined = parsePluralForms('nplurals=2; plural=n>1;')?.pluralsFunc(2);
 const fallback: number = DEFAULT_PLURAL_FORMS.nplurals;
-export const all = [strings, translator, index, parsed, fallback];
+export const all = [strings, translator, index, parsed, fallback, moEntry, moHeaders];
 `;
 
 // exactOptionalPropertyTypes consumers can pass an explicit undefined for every option

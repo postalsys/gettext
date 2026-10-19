@@ -1,0 +1,13 @@
+msgid ""
+msgstr ""
+"Language: fr\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Summer"
+msgstr "Été"
+
+msgid "One day"
+msgid_plural "{n} days"
+msgstr[0] "Un journée"
+msgstr[1] "{n} journées"

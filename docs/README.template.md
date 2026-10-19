@@ -4,7 +4,7 @@
 
 **`@postalsys/gettext`** is a JavaScript implementation of a substantial subset of [GNU gettext](https://www.gnu.org/software/gettext/), a powerful localization framework originally written in C. This library enables developers to internationalize their JavaScript applications by handling translations, plural forms, and contexts, closely mirroring the functionality of the original gettext.
 
-If you're interested in parsing or compiling `.mo`/`.po` files for use with this library or elsewhere, consider using [gettext-parser](https://github.com/smhg/gettext-parser).
+Compiled `.mo` catalogs can be read with the built-in `parseMo()`. For `.po` files, or for compiling catalogs, consider using [gettext-parser](https://github.com/smhg/gettext-parser).
 
 ## Table of Contents
 
@@ -24,7 +24,7 @@ If you're interested in parsing or compiling `.mo`/`.po` files for use with this
 ## Features
 
 -   **Comprehensive Localization Support**: Handles domains, contexts, plurals, and more.
--   **File Format Compatibility**: Supports `.json`, `.mo`, and `.po` files via [gettext-parser](https://github.com/smhg/gettext-parser).
+-   **File Format Compatibility**: Reads compiled `.mo` catalogs with the built-in `parseMo()`, and `.json` or `.po` catalogs parsed by [gettext-parser](https://github.com/smhg/gettext-parser).
 -   **Extensive Language Support**: Includes plural forms for 136 languages, and reads the catalog's `Plural-Forms` header for any other language.
 -   **Dynamic Configuration**: Allows changing locale or domain at runtime.
 -   **Debugging Tools**: Provides detailed error messages when the `debug` option is enabled.
@@ -86,7 +86,18 @@ gt.gettext('An unrecognized message');
 
 #### Loading Translations from .mo or .po Files
 
-`@postalsys/gettext` works seamlessly with translations parsed by [`gettext-parser`](https://github.com/smhg/gettext-parser). Here's how you can load translations from `.po` files:
+A compiled `.mo` file can be read without any other dependency. `parseMo()` returns the same catalog as gettext-parser's `mo.parse()`: both byte orders, contexts, plural forms, and strings decoded from the charset in the catalog header. It throws for input that is not a `.mo` file.
+
+```js
+const fs = require('fs');
+const Gettext = require('@postalsys/gettext');
+const { parseMo } = require('@postalsys/gettext'); // or Gettext.parseMo, or import { parseMo } from '@postalsys/gettext'
+
+const gt = new Gettext();
+gt.addTranslations('sv-SE', 'messages', parseMo(fs.readFileSync('path/to/locales/sv-SE/messages.mo')));
+```
+
+`@postalsys/gettext` also works seamlessly with translations parsed by [`gettext-parser`](https://github.com/smhg/gettext-parser). Here's how you can load translations from `.po` files:
 
 ```js
 const fs = require('fs');
