@@ -310,6 +310,52 @@ describe('Gettext', () => {
         });
     });
 
+    describe('Object.prototype member names', () => {
+        const names = ['constructor', 'toString', '__proto__', 'hasOwnProperty', 'valueOf', 'isPrototypeOf', '__defineGetter__'];
+
+        // Built as JSON text so "__proto__" ends up an own key after JSON.parse, the way a parsed catalog carries it
+        const entry = (msgctxt, msgid) => ({ msgctxt, msgid, msgid_plural: `${msgid} plural`, msgstr: [`${msgctxt}:${msgid}:0`, `${msgctxt}:${msgid}:1`] });
+        const contextJson = (msgctxt, msgids) => `{${msgids.map(msgid => `${JSON.stringify(msgid)}:${JSON.stringify(entry(msgctxt, msgid))}`).join(',')}}`;
+        const buildCatalog = () => {
+            const contexts = [`"":${contextJson('', names)}`, ...names.map(name => `${JSON.stringify(name)}:${contextJson(name, [name])}`)];
+            return JSON.parse(`{"charset":"utf-8","headers":{"plural-forms":"nplurals=2; plural=(n != 1);"},"translations":{${contexts.join(',')}}}`);
+        };
+
+        it('should return the msgid without throwing when the catalog does not define it', () => {
+            gt.addTranslations('et-EE', 'messages', jsonFile);
+            gt.setLocale('et-EE');
+            const local = gt.useLocale('et-EE');
+
+            for (const name of names) {
+                assert.strictEqual(gt.gettext(name), name);
+                assert.strictEqual(gt.ngettext(name, `${name}s`, 1), name);
+                assert.strictEqual(gt.ngettext(name, `${name}s`, 5), `${name}s`);
+                assert.strictEqual(gt.pgettext(name, name), name);
+                assert.strictEqual(gt.pgettext('', name), name);
+                assert.strictEqual(gt.npgettext(name, name, `${name}s`, 5), `${name}s`);
+                assert.strictEqual(gt.dgettext(name, 'o2-1'), 'o2-1');
+                assert.deepStrictEqual(gt.getComment('messages', name, name), {});
+                assert.strictEqual(local.gettext(name), name);
+                assert.strictEqual(local.npgettext(name, name, `${name}s`, 2), `${name}s`);
+            }
+        });
+
+        it('should resolve translations whose msgid and context are Object.prototype member names', () => {
+            gt.addTranslations('et-EE', 'messages', buildCatalog());
+            gt.setLocale('et-EE');
+            const local = gt.useLocale('et-EE');
+
+            for (const name of names) {
+                assert.strictEqual(gt.gettext(name), `:${name}:0`);
+                assert.strictEqual(gt.ngettext(name, 'x', 1), `:${name}:0`);
+                assert.strictEqual(gt.ngettext(name, 'x', 3), `:${name}:1`);
+                assert.strictEqual(gt.pgettext(name, name), `${name}:${name}:0`);
+                assert.strictEqual(gt.npgettext(name, name, 'x', 3), `${name}:${name}:1`);
+                assert.strictEqual(local.npgettext(name, name, 'x', 3), `${name}:${name}:1`);
+            }
+        });
+    });
+
     describe('Events', () => {
         let errorListener;
 
