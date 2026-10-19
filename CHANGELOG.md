@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/postalsys/gettext/compare/v4.1.2...v4.2.0) (2026-10-19)
+
+
+### Features
+
+* migrate to TypeScript with ES module and CommonJS builds ([541aec3](https://github.com/postalsys/gettext/commit/541aec3be5295e662e811391b24a40066b425ce5))
+
 ## [4.1.2](https://github.com/postalsys/gettext/compare/v4.1.1...v4.1.2) (2026-10-19)
 
 
