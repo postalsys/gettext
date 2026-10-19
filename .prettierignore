@@ -1,0 +1,17 @@
+# Dependencies and lockfiles
+node_modules/
+package-lock.json
+
+# Build output
+coverage/
+dist/
+
+# Auto-generated files
+CHANGELOG.md
+# README.md is generated from docs/README.template.md by `npm run docs`
+README.md
+# jsdoc2md templates (Handlebars partials Prettier cannot parse) and legacy docs
+docs/
+
+# Test fixtures must stay byte-identical
+test/fixtures/
