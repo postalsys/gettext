@@ -370,5 +370,28 @@ describe('Gettext', () => {
             gtd.gettext('This message is not translated');
             assert.strictEqual(errorListenersourceLocale.mock.callCount(), 0);
         });
+
+        it('should name the received type in invalid argument warnings', () => {
+            gt.addTranslations(42, 'messages', jsonFile);
+            gt.addTranslations('et-EE', null, jsonFile);
+            gt.setLocale(false);
+            gt.setTextDomain(undefined);
+
+            assert.deepStrictEqual(
+                errorListener.mock.calls.map(call => call.arguments[0].message),
+                [
+                    'Invalid argument for locale in addTranslations(): Expected a string, but received a number.',
+                    'Invalid argument for domain in addTranslations(): Expected a string, but received a object.',
+                    'Invalid argument for setLocale(): Expected a string, but received a boolean.',
+                    'Invalid argument for setTextDomain(): Expected a string, but received a undefined.'
+                ]
+            );
+        });
+
+        it('should name useLocale() and the received type when useLocale() is given a non-string', () => {
+            assert.throws(() => gt.useLocale(7), {
+                message: 'Invalid argument for useLocale(): Expected a string, but received a number.'
+            });
+        });
     });
 });
