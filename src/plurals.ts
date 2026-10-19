@@ -1,6 +1,25 @@
-'use strict';
+// Plural rules per language, keyed by the language code Gettext.getLanguageCode() returns
 
-module.exports = {
+/** A sample count and the msgstr index it selects */
+export interface PluralExample {
+    plural: number;
+    sample: number;
+}
+
+/** The plural rule of one language */
+export interface PluralRule {
+    /** English name of the language */
+    name: string;
+    examples: PluralExample[];
+    /** Number of plural forms */
+    nplurals: number;
+    /** The rule as a Plural-Forms header, written with JavaScript equality operators */
+    pluralsText: string;
+    /** Returns the msgstr index for a count, a boolean stands for 0 or 1 */
+    pluralsFunc: (n: number) => number | boolean;
+}
+
+const plurals: Record<string, PluralRule> = {
     ach: {
         name: 'Acholi',
         examples: [
@@ -2206,3 +2225,5 @@ module.exports = {
         pluralsFunc: () => 0
     }
 };
+
+export default plurals;

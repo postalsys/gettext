@@ -30,6 +30,13 @@ jobs:
             - run: npm run lint
             - run: npm run format:check
             - run: npm test
-            - name: Run tests with require(esm) disabled
+              if: matrix.node != '24.x'
+            # One matrix entry runs the suite under c8, which enforces the thresholds in .c8rc.json
+            - run: npm run test:coverage
+              if: matrix.node == '24.x'
+            # Node 22+ loads ES modules through require() by default, which would hide an ESM-only
+            # dependency. Load the built CommonJS entry with that turned off, as the pkg binary
+            # EmailEngine ships would load it.
+            - name: Run the CommonJS smoke test with require(esm) disabled
               if: matrix.node != '20.x'
               run: npm run test:cjs

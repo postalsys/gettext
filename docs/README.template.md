@@ -61,6 +61,12 @@ console.log(gt.gettext('The world is a funny place'));
 // Output: "Världen är en underlig plats"
 ```
 
+The package ships CommonJS and ES module builds with TypeScript type declarations, so it can also be imported from an ES module or a TypeScript project:
+
+```js
+import Gettext from '@postalsys/gettext';
+```
+
 ### Error Events
 
 `@postalsys/gettext` emits an `error` event when it encounters issues such as missing translations. You can handle these events as follows:

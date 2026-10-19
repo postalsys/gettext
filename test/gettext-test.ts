@@ -1,17 +1,16 @@
-'use strict';
-
-const { describe, it, beforeEach, mock } = require('node:test');
-const assert = require('node:assert/strict');
-let Gettext = require('../lib/gettext');
-let fs = require('fs');
+import { describe, it, beforeEach, mock } from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import Gettext from '../src/gettext.js';
+import type { LocaleGettext } from '../src/gettext.js';
 
 describe('Gettext', () => {
-    let gt;
-    let jsonFile;
+    let gt: Gettext;
+    let jsonFile: any;
 
     beforeEach(() => {
         gt = new Gettext({ debug: false });
-        jsonFile = JSON.parse(fs.readFileSync(__dirname + '/fixtures/latin13.json'));
+        jsonFile = JSON.parse(fs.readFileSync(new URL('fixtures/latin13.json', import.meta.url), 'utf8'));
     });
 
     describe('#constructor', () => {
@@ -34,15 +33,15 @@ describe('Gettext', () => {
             });
 
             it('should reject non-string values', () => {
-                gtc = new Gettext({ sourceLocale: null });
+                gtc = new Gettext({ sourceLocale: null as any });
                 assert.strictEqual(gtc.sourceLocale, '');
-                gtc = new Gettext({ sourceLocale: 123 });
+                gtc = new Gettext({ sourceLocale: 123 as any });
                 assert.strictEqual(gtc.sourceLocale, '');
-                gtc = new Gettext({ sourceLocale: false });
+                gtc = new Gettext({ sourceLocale: false as any });
                 assert.strictEqual(gtc.sourceLocale, '');
-                gtc = new Gettext({ sourceLocale: {} });
+                gtc = new Gettext({ sourceLocale: {} as any });
                 assert.strictEqual(gtc.sourceLocale, '');
-                gtc = new Gettext({ sourceLocale: () => {} });
+                gtc = new Gettext({ sourceLocale: (() => {}) as any });
                 assert.strictEqual(gtc.sourceLocale, '');
             });
         });
@@ -87,17 +86,17 @@ describe('Gettext', () => {
         });
 
         it('should reject non-string locales', () => {
-            gt.setLocale(null);
+            gt.setLocale(null as any);
             assert.strictEqual(gt.locale, '');
-            gt.setLocale(123);
+            gt.setLocale(123 as any);
             assert.strictEqual(gt.locale, '');
-            gt.setLocale(false);
+            gt.setLocale(false as any);
             assert.strictEqual(gt.locale, '');
-            gt.setLocale(() => {});
+            gt.setLocale((() => {}) as any);
             assert.strictEqual(gt.locale, '');
-            gt.setLocale(NaN);
+            gt.setLocale(NaN as any);
             assert.strictEqual(gt.locale, '');
-            gt.setLocale();
+            (gt as any).setLocale();
             assert.strictEqual(gt.locale, '');
         });
     });
@@ -117,17 +116,17 @@ describe('Gettext', () => {
         });
 
         it('should reject non-string domains', () => {
-            gt.setTextDomain(null);
+            gt.setTextDomain(null as any);
             assert.strictEqual(gt.domain, 'messages');
-            gt.setTextDomain(123);
+            gt.setTextDomain(123 as any);
             assert.strictEqual(gt.domain, 'messages');
-            gt.setTextDomain(false);
+            gt.setTextDomain(false as any);
             assert.strictEqual(gt.domain, 'messages');
-            gt.setTextDomain(() => {});
+            gt.setTextDomain((() => {}) as any);
             assert.strictEqual(gt.domain, 'messages');
-            gt.setTextDomain(NaN);
+            gt.setTextDomain(NaN as any);
             assert.strictEqual(gt.domain, 'messages');
-            gt.setTextDomain();
+            (gt as any).setTextDomain();
             assert.strictEqual(gt.domain, 'messages');
         });
     });
@@ -216,7 +215,7 @@ describe('Gettext', () => {
     });
 
     describe('Resolve translations with useLocale', () => {
-        let localGt = new Gettext({ sourceLocale: 'en_US' });
+        let localGt: LocaleGettext = new Gettext({ sourceLocale: 'en_US' });
         beforeEach(() => {
             gt.addTranslations('et-EE', 'messages', jsonFile);
             localGt = gt.useLocale('et-EE');
@@ -294,7 +293,7 @@ describe('Gettext', () => {
 
         it('should pass msgid when no translation is found', () => {
             assert.strictEqual(gt.gettext('unknown phrase'), 'unknown phrase');
-            assert.strictEqual(gt.dnpgettext('unknown domain', null, 'hello'), 'hello');
+            assert.strictEqual(gt.dnpgettext('unknown domain', null as any, 'hello'), 'hello');
             assert.strictEqual(gt.dnpgettext('messages', 'unknown context', 'hello'), 'hello');
 
             // 'o2-1' is translated, but no locale has been set yet
@@ -314,8 +313,14 @@ describe('Gettext', () => {
         const names = ['constructor', 'toString', '__proto__', 'hasOwnProperty', 'valueOf', 'isPrototypeOf', '__defineGetter__'];
 
         // Built as JSON text so "__proto__" ends up an own key after JSON.parse, the way a parsed catalog carries it
-        const entry = (msgctxt, msgid) => ({ msgctxt, msgid, msgid_plural: `${msgid} plural`, msgstr: [`${msgctxt}:${msgid}:0`, `${msgctxt}:${msgid}:1`] });
-        const contextJson = (msgctxt, msgids) => `{${msgids.map(msgid => `${JSON.stringify(msgid)}:${JSON.stringify(entry(msgctxt, msgid))}`).join(',')}}`;
+        const entry = (msgctxt: string, msgid: string) => ({
+            msgctxt,
+            msgid,
+            msgid_plural: `${msgid} plural`,
+            msgstr: [`${msgctxt}:${msgid}:0`, `${msgctxt}:${msgid}:1`]
+        });
+        const contextJson = (msgctxt: string, msgids: string[]) =>
+            `{${msgids.map(msgid => `${JSON.stringify(msgid)}:${JSON.stringify(entry(msgctxt, msgid))}`).join(',')}}`;
         const buildCatalog = () => {
             const contexts = [`"":${contextJson('', names)}`, ...names.map(name => `${JSON.stringify(name)}:${contextJson(name, [name])}`)];
             return JSON.parse(`{"charset":"utf-8","headers":{"plural-forms":"nplurals=2; plural=(n != 1);"},"translations":{${contexts.join(',')}}}`);
@@ -357,7 +362,7 @@ describe('Gettext', () => {
     });
 
     describe('Events', () => {
-        let errorListener;
+        let errorListener: ReturnType<typeof mock.fn<(err: Error) => void>>;
 
         beforeEach(() => {
             errorListener = mock.fn();
@@ -376,7 +381,7 @@ describe('Gettext', () => {
         });
 
         it('should emit an error event when adding a reserved key as locale', () => {
-            gt.addTranslations('__proto__', 'polluted', 'pwned');
+            gt.addTranslations('__proto__', 'polluted', 'pwned' as any);
             assert.strictEqual(errorListener.mock.callCount(), 1);
         });
 
@@ -418,10 +423,10 @@ describe('Gettext', () => {
         });
 
         it('should name the received type in invalid argument warnings', () => {
-            gt.addTranslations(42, 'messages', jsonFile);
-            gt.addTranslations('et-EE', null, jsonFile);
-            gt.setLocale(false);
-            gt.setTextDomain(undefined);
+            gt.addTranslations(42 as any, 'messages', jsonFile);
+            gt.addTranslations('et-EE', null as any, jsonFile);
+            gt.setLocale(false as any);
+            gt.setTextDomain(undefined as any);
 
             assert.deepStrictEqual(
                 errorListener.mock.calls.map(call => call.arguments[0].message),
@@ -435,9 +440,78 @@ describe('Gettext', () => {
         });
 
         it('should name useLocale() and the received type when useLocale() is given a non-string', () => {
-            assert.throws(() => gt.useLocale(7), {
+            assert.throws(() => gt.useLocale(7 as any), {
                 message: 'Invalid argument for useLocale(): Expected a string, but received a number.'
             });
+        });
+
+        it('should refuse reserved keywords as a domain or locale everywhere', () => {
+            gt.addTranslations('et-EE', 'constructor', jsonFile);
+            gt.setLocale('toString');
+            gt.setTextDomain('__proto__');
+            assert.deepStrictEqual(Object.keys(gt.catalogs), []);
+            assert.strictEqual(gt.locale, '');
+            assert.strictEqual(gt.domain, 'messages');
+            assert.throws(() => gt.useLocale('hasOwnProperty'), {
+                message: 'Invalid locale: "hasOwnProperty" is a reserved keyword and cannot be used as a locale.'
+            });
+            assert.deepStrictEqual(
+                errorListener.mock.calls.map(call => call.arguments[0].message),
+                [
+                    'Invalid domain: "constructor" is a reserved keyword and cannot be used as a domain.',
+                    'Invalid locale: "toString" is a reserved keyword and cannot be used as a locale.',
+                    'Invalid domain: "__proto__" is a reserved keyword and cannot be used as a domain.'
+                ]
+            );
+        });
+
+        it('should warn about an empty or unknown locale in useLocale()', () => {
+            gt.addTranslations('et-EE', 'messages', jsonFile);
+            gt.useLocale('et-EE');
+            gt.useLocale(' ');
+            assert.deepStrictEqual(
+                errorListener.mock.calls.map(call => call.arguments[0].message),
+                ['Invalid locale: The locale cannot be an empty string.', 'Locale " " not found: No translations have been added for this locale.']
+            );
+        });
+
+        it('should log warnings to the console in debug mode', t => {
+            const consoleWarn = t.mock.method(console, 'warn', () => undefined);
+            const debugGt = new Gettext({ debug: true });
+            debugGt.on('error', errorListener);
+            debugGt.gettext('missing');
+            assert.deepStrictEqual(
+                consoleWarn.mock.calls.map(call => call.arguments[0]),
+                ['Translation not found for msgid "missing" with context "" in domain "messages".']
+            );
+            assert.strictEqual(errorListener.mock.callCount(), 1);
+        });
+    });
+
+    describe('Incomplete catalog entries', () => {
+        beforeEach(() => {
+            gt.addTranslations('en', 'messages', {
+                translations: {
+                    '': {
+                        bare: { msgid: 'bare', msgstr: ['Bare'] },
+                        broken: { msgid: 'broken', msgstr: 'not an array' as any },
+                        empty: { msgid: 'empty', msgid_plural: 'empties', msgstr: ['', ''] }
+                    }
+                }
+            });
+            gt.setLocale('en');
+        });
+
+        it('should return an empty comments object for an entry without comments', () => {
+            assert.deepStrictEqual(gt.getComment('messages', '', 'bare'), {});
+        });
+
+        it('should fall back to the msgid when msgstr is not a list or the form is empty', () => {
+            assert.strictEqual(gt.gettext('broken'), 'broken');
+            assert.strictEqual(gt.ngettext('empty', 'empties', 1), 'empty');
+            assert.strictEqual(gt.ngettext('empty', 'empties', 2), 'empties');
+            // without a plural msgid the singular one stands in for it
+            assert.strictEqual(gt.ngettext('empty', '', 2), 'empty');
         });
     });
 });

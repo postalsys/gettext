@@ -1,5 +1,3 @@
-'use strict';
-
 // Evaluates the `Plural-Forms` header of a catalog (`nplurals=N; plural=EXPR;`) without eval,
 // new Function or vm. EXPR is the C subset GNU gettext accepts: the variable n, decimal integer
 // literals, parentheses, unary !, binary * / % + - < <= > >= == != && || and the ?: conditional.
@@ -16,9 +14,19 @@ const OPERATORS = ['==', '!=', '<=', '>=', '&&', '||', '<', '>', '!', '*', '/', 
 
 const BINARY_LEVELS = [['||'], ['&&'], ['==', '!='], ['<', '<=', '>', '>='], ['+', '-'], ['*', '/', '%']];
 
-const toInt = value => (value ? 1 : 0);
+/** A plural rule: the number of forms and a function that picks the msgstr index for a count */
+export interface PluralForms {
+    nplurals: number;
+    pluralsFunc: (n: number) => number;
+}
 
-const BINARY_OPERATIONS = {
+type Compiled = (n: number) => number;
+
+type Token = { type: 'n' } | { type: 'number'; value: number } | { type: 'op'; value: string };
+
+const toInt = (value: unknown): number => (value ? 1 : 0);
+
+const BINARY_OPERATIONS: Record<string, (left: Compiled, right: Compiled) => Compiled> = {
     '||': (left, right) => n => toInt(left(n) || right(n)),
     '&&': (left, right) => n => toInt(left(n) && right(n)),
     '==': (left, right) => n => toInt(left(n) === right(n)),
@@ -41,8 +49,8 @@ const BINARY_OPERATIONS = {
     }
 };
 
-function tokenize(expression) {
-    const tokens = [];
+function tokenize(expression: string): Token[] {
+    const tokens: Token[] = [];
     let pos = 0;
 
     while (pos < expression.length) {
@@ -85,17 +93,20 @@ function tokenize(expression) {
 
 // Recursive-descent parser that compiles straight into closures, one per AST node
 class ExpressionParser {
-    constructor(tokens) {
+    tokens: Token[];
+    pos: number;
+
+    constructor(tokens: Token[]) {
         this.tokens = tokens;
         this.pos = 0;
     }
 
-    peekOp() {
+    peekOp(): string | null {
         const token = this.tokens[this.pos];
         return token && token.type === 'op' ? token.value : null;
     }
 
-    expectOp(value) {
+    expectOp(value: string): void {
         if (this.peekOp() !== value) {
             throw new Error(`Expected "${value}"`);
         }
@@ -103,14 +114,14 @@ class ExpressionParser {
     }
 
     // depth counts nested conditionals, parentheses and ! operators, so recursion stays bounded
-    static checkDepth(depth) {
+    static checkDepth(depth: number): void {
         if (depth > MAX_NESTING_DEPTH) {
             throw new Error('Expression nested too deeply');
         }
     }
 
     // conditional := binary(0) [ "?" conditional ":" conditional ]
-    parseConditional(depth) {
+    parseConditional(depth: number): Compiled {
         ExpressionParser.checkDepth(depth);
         const condition = this.parseBinary(0, depth);
         if (this.peekOp() !== '?') {
@@ -124,7 +135,7 @@ class ExpressionParser {
     }
 
     // Left-associative binary operators, one precedence level per BINARY_LEVELS entry
-    parseBinary(level, depth) {
+    parseBinary(level: number, depth: number): Compiled {
         if (level >= BINARY_LEVELS.length) {
             return this.parseUnary(depth);
         }
@@ -139,7 +150,7 @@ class ExpressionParser {
     }
 
     // unary := "!" unary | primary
-    parseUnary(depth) {
+    parseUnary(depth: number): Compiled {
         if (this.peekOp() !== '!') {
             return this.parsePrimary(depth);
         }
@@ -150,7 +161,7 @@ class ExpressionParser {
     }
 
     // primary := "n" | integer | "(" conditional ")"
-    parsePrimary(depth) {
+    parsePrimary(depth: number): Compiled {
         const token = this.tokens[this.pos++];
         if (!token) {
             throw new Error('Unexpected end of expression');
@@ -177,7 +188,7 @@ class ExpressionParser {
  * @param  {String}   expression  The plural= part of a Plural-Forms header
  * @return {Function} n => numeric plural index (not yet clamped)
  */
-function compileExpression(expression) {
+function compileExpression(expression: string): Compiled {
     const parser = new ExpressionParser(tokenize(expression));
     const compiled = parser.parseConditional(0);
     if (parser.pos !== parser.tokens.length) {
@@ -192,13 +203,13 @@ function compileExpression(expression) {
  * @param  {String} header  e.g. "nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 ? 1 : 2);"
  * @return {Object|null} { nplurals, pluralsFunc } or null if the header is missing or malformed
  */
-function parsePluralForms(header) {
+export function parsePluralForms(header: unknown): PluralForms | null {
     if (typeof header !== 'string' || header.length > MAX_HEADER_LENGTH) {
         return null;
     }
 
-    let nplurals;
-    let expression;
+    let nplurals: number | undefined;
+    let expression: string | undefined;
     for (const part of header.split(';')) {
         const separator = part.indexOf('=');
         if (separator < 0) {
@@ -216,33 +227,32 @@ function parsePluralForms(header) {
         }
     }
 
-    if (!(nplurals >= 1 && nplurals <= MAX_NPLURALS) || !expression) {
+    if (nplurals === undefined || !(nplurals >= 1 && nplurals <= MAX_NPLURALS) || !expression) {
         return null;
     }
 
-    let evaluate;
+    let evaluate: Compiled;
     try {
         evaluate = compileExpression(expression);
     } catch {
         return null;
     }
 
+    const forms = nplurals;
     return {
-        nplurals,
+        nplurals: forms,
         pluralsFunc: n => {
             const index = Math.trunc(evaluate(n));
             if (!Number.isFinite(index) || index < 0) {
                 return 0;
             }
-            return Math.min(index, nplurals - 1);
+            return Math.min(index, forms - 1);
         }
     };
 }
 
 // GNU gettext's default when a catalog has no usable Plural-Forms header
-const DEFAULT_PLURAL_FORMS = {
+export const DEFAULT_PLURAL_FORMS: PluralForms = {
     nplurals: 2,
     pluralsFunc: n => toInt(n !== 1)
 };
-
-module.exports = { parsePluralForms, DEFAULT_PLURAL_FORMS };

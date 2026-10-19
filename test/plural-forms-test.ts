@@ -1,21 +1,24 @@
-'use strict';
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import Gettext from '../src/gettext.js';
+import plurals from '../src/plurals.js';
+import { parsePluralForms as parseOrNull } from '../src/plural-forms.js';
+import type { PluralForms } from '../src/plural-forms.js';
+import type { Catalog } from '../src/gettext.js';
 
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-const Gettext = require('../lib/gettext');
-const plurals = require('../lib/plurals');
-const { parsePluralForms } = require('../lib/plural-forms');
+// The rules under test parse, the assertions on the ones that must not still see the null
+const parsePluralForms = (header: unknown) => parseOrNull(header) as PluralForms;
 
-// lib/plurals.js writes its rules with JavaScript equality operators, catalogs use the C ones
-const toCHeader = pluralsText => `${pluralsText.replaceAll('===', '==').replaceAll('!==', '!=')};`;
+// src/plurals.ts writes its rules with JavaScript equality operators, catalogs use the C ones
+const toCHeader = (pluralsText: string) => `${pluralsText.replaceAll('===', '==').replaceAll('!==', '!=')};`;
 
-const tableIndex = (language, n) => {
-    const index = plurals[language].pluralsFunc(n);
+const tableIndex = (language: string, n: number) => {
+    const index = plurals[language]!.pluralsFunc(n);
     return typeof index === 'boolean' ? Number(index) : index;
 };
 
 // Plural-Forms headers as they appear in real catalogs for these languages
-const GNU_HEADERS = {
+const GNU_HEADERS: Record<string, string> = {
     pl: 'nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);',
     ru: 'nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);',
     ar: 'nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5);',
@@ -25,7 +28,7 @@ const GNU_HEADERS = {
 };
 
 describe('Plural-Forms evaluator', () => {
-    it('should agree with lib/plurals.js for every language for n in 0..200', () => {
+    it('should agree with src/plurals.ts for every language for n in 0..200', () => {
         for (const language of Object.keys(plurals)) {
             const rule = parsePluralForms(toCHeader(plurals[language].pluralsText));
             assert.ok(rule, `rule for ${language} should parse`);
@@ -36,7 +39,7 @@ describe('Plural-Forms evaluator', () => {
         }
     });
 
-    it('should agree with lib/plurals.js for real catalog headers (Polish, Russian, Arabic, Czech, Irish, Slovenian)', () => {
+    it('should agree with src/plurals.ts for real catalog headers (Polish, Russian, Arabic, Czech, Irish, Slovenian)', () => {
         for (const [language, header] of Object.entries(GNU_HEADERS)) {
             const rule = parsePluralForms(header);
             assert.ok(rule, `rule for ${language} should parse`);
@@ -129,7 +132,7 @@ describe('Plural-Forms evaluator', () => {
         const long = `nplurals=2; plural=${'n + '.repeat(200)}n;`;
         assert.strictEqual(parsePluralForms(long), null);
 
-        const deep = depth => `nplurals=2; plural=${'('.repeat(depth)}n != 1${')'.repeat(depth)};`;
+        const deep = (depth: number) => `nplurals=2; plural=${'('.repeat(depth)}n != 1${')'.repeat(depth)};`;
         assert.strictEqual(parsePluralForms(deep(10)).pluralsFunc(2), 1);
         assert.strictEqual(parsePluralForms(deep(100)), null);
         assert.strictEqual(parsePluralForms(`nplurals=2; plural=${'!'.repeat(100)}n;`), null);
@@ -145,10 +148,10 @@ describe('Plural-Forms evaluator', () => {
     });
 });
 
-describe('Gettext plural forms for languages missing from lib/plurals.js', () => {
-    const buildCatalog = headers => ({
+describe('Gettext plural forms for languages missing from src/plurals.ts', () => {
+    const buildCatalog = (headers: unknown): Catalog => ({
         charset: 'utf-8',
-        headers,
+        headers: headers as Catalog['headers'],
         translations: {
             '': {
                 file: { msgid: 'file', msgid_plural: 'files', msgstr: ['form0', 'form1', 'form2'] }
@@ -156,7 +159,7 @@ describe('Gettext plural forms for languages missing from lib/plurals.js', () =>
         }
     });
 
-    const setup = (locale, headers) => {
+    const setup = (locale: string, headers: unknown) => {
         const gt = new Gettext();
         gt.addTranslations(locale, 'messages', buildCatalog(headers));
         gt.setLocale(locale);
@@ -183,7 +186,7 @@ describe('Gettext plural forms for languages missing from lib/plurals.js', () =>
     it('should pick up a changed header on the same catalog', () => {
         const gt = setup('xx', { 'plural-forms': 'nplurals=2; plural=0;' });
         assert.strictEqual(gt.ngettext('file', 'files', 5), 'form0');
-        gt.catalogs.xx.messages.headers['plural-forms'] = 'nplurals=3; plural=2;';
+        gt.catalogs.xx!.messages!.headers!['plural-forms'] = 'nplurals=3; plural=2;';
         assert.strictEqual(gt.ngettext('file', 'files', 5), 'form2');
     });
 
@@ -206,13 +209,13 @@ describe('Gettext plural forms for languages missing from lib/plurals.js', () =>
         for (const locale of ['xx', 'pl']) {
             const gt = setup(locale, { 'plural-forms': GNU_HEADERS.pl });
             for (const count of ['5', null, undefined, {}, [], true, NaN, Infinity, -3, 2.5, Symbol('n'), 10n]) {
-                const result = gt.ngettext('file', 'files', count);
+                const result = gt.ngettext('file', 'files', count as any);
                 assert.ok(['form0', 'form1', 'form2'].includes(result), `${locale} ${String(count)} gave ${result}`);
             }
             // nothing translated: the singular or plural msgid comes back instead
-            assert.strictEqual(gt.ngettext('missing', 'missings', Symbol('n')), 'missing');
-            assert.strictEqual(gt.ngettext('missing', 'missings', 10n), 'missing');
-            assert.strictEqual(gt.ngettext('missing', 'missings', '5'), 'missings');
+            assert.strictEqual(gt.ngettext('missing', 'missings', Symbol('n') as any), 'missing');
+            assert.strictEqual(gt.ngettext('missing', 'missings', 10n as any), 'missing');
+            assert.strictEqual(gt.ngettext('missing', 'missings', '5' as any), 'missings');
         }
     });
 });
