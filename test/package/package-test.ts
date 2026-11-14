@@ -114,6 +114,18 @@ describe('Built package', { timeout: 30 * 1000, skip: hasDist ? false : 'dist/ i
         }
     });
 
+    it('imports no Node.js built-in modules, so bundlers can build it for the browser', () => {
+        // TextDecoder is a global in Node 11+ and in browsers; importing it from node:util makes Vite
+        // and Rollup fail with '"TextDecoder" is not exported by "__vite-browser-external"'
+        for (const format of ['esm', 'cjs']) {
+            const dir = path.join(root, 'dist', format);
+            for (const file of fs.readdirSync(dir).filter(f => f.endsWith('.js'))) {
+                const code = fs.readFileSync(path.join(dir, file), 'utf8');
+                assert.doesNotMatch(code, /(?:from\s*|require\s*\(\s*)['"]node:/, `dist/${format}/${file}`);
+            }
+        }
+    });
+
     describe('CommonJS build', () => {
         it('resolves require() to the CommonJS entry point', () => {
             assert.strictEqual(require.resolve(packageName), path.join(root, 'dist', 'cjs', 'gettext.js'));
