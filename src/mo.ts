@@ -1,5 +1,3 @@
-import { TextDecoder } from 'node:util';
-
 /** One entry of a parsed .mo catalog */
 export interface MoTranslation {
     msgid: string;
@@ -85,13 +83,12 @@ function getDecoder(charset: string): (bytes: Buffer) => string {
         // TextDecoder maps "ascii" to windows-1252 as well, gettext-parser replaces every byte above 0x7f
         return bytes => bytes.toString('latin1').replace(/[\u0080-\u00ff]/g, '\ufffd');
     }
-    let decoder: TextDecoder;
     try {
-        decoder = new TextDecoder(charset);
+        const decoder = new TextDecoder(charset);
+        return bytes => decoder.decode(bytes);
     } catch {
         return bytes => bytes.toString('utf8');
     }
-    return bytes => decoder.decode(bytes);
 }
 
 /** Parses the header entry into key-value pairs */
