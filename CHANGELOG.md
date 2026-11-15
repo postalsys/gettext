@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.3.1](https://github.com/postalsys/gettext/compare/v4.3.0...v4.3.1) (2026-11-15)
+
+
+### Bug Fixes
+
+* use the global TextDecoder so browser bundles build ([c86c385](https://github.com/postalsys/gettext/commit/c86c3859100df7778e092abebf51b7e5b530c2df))
+* use the global TextDecoder so browser bundles build ([817632a](https://github.com/postalsys/gettext/commit/817632ac7f88c5d453f4d46d583428cd21b33eb3))
+
 ## [4.3.0](https://github.com/postalsys/gettext/compare/v4.2.0...v4.3.0) (2026-10-19)
 
 
