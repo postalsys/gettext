@@ -244,3 +244,12 @@ describe('Built package', { timeout: 30 * 1000, skip: hasDist ? false : 'dist/ i
         });
     });
 });
+
+// The registry, SBOM tools and license gates read the SPDX `license` field; the deprecated
+// `licenses` array is invisible to them, which made the package look unlicensed.
+describe('Package metadata', () => {
+    it('declares its license as an SPDX expression', () => {
+        assert.strictEqual(pkg.license, 'MIT');
+        assert.strictEqual(pkg.licenses, undefined);
+    });
+});
