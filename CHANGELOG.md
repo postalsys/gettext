@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.2](https://github.com/postalsys/gettext/compare/v4.3.1...v4.3.2) (2026-11-16)
+
+
+### Bug Fixes
+
+* declare the license as an SPDX expression ([28fcf1f](https://github.com/postalsys/gettext/commit/28fcf1ff803dd38bcc4c650245886d8a7c99b0e0))
+
 ## [4.3.1](https://github.com/postalsys/gettext/compare/v4.3.0...v4.3.1) (2026-11-15)
 
 
